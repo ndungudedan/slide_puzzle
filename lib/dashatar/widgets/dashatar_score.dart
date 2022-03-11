@@ -157,7 +157,7 @@ class DashatarScore extends StatelessWidget {
                         duration: PuzzleThemeAnimationDuration.textStyle,
                         child: Text(
                           l10n.dashatarSuccessNumberOfMoves(
-                            state.numberOfMoves.toString(),
+                            state.numberOfCorrectTiles.toString(),
                           ),
                         ),
                       ),

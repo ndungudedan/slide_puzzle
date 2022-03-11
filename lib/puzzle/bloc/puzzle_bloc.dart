@@ -10,14 +10,16 @@ part 'puzzle_event.dart';
 part 'puzzle_state.dart';
 
 class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
-  PuzzleBloc(this._size, {this.random}) : super(const PuzzleState()) {
+  PuzzleBloc(
+    this._size, {
+    this.random,
+  }) : super(PuzzleState()) {
     on<PuzzleInitialized>(_onPuzzleInitialized);
     on<TileTapped>(_onTileTapped);
     on<PuzzleReset>(_onPuzzleReset);
   }
 
   final int _size;
-
   final Random? random;
 
   void _onPuzzleInitialized(
@@ -29,6 +31,8 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
       PuzzleState(
         puzzle: puzzle.sort(),
         numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
+        numberOfMoves:
+            puzzle.tiles.where((element) => element.isCheekyBird).length + 2,
       ),
     );
   }
@@ -36,18 +40,25 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
   void _onTileTapped(TileTapped event, Emitter<PuzzleState> emit) {
     final tappedTile = event.tile;
     if (state.puzzleStatus == PuzzleStatus.incomplete) {
-      if (state.puzzle.isTileMovable(tappedTile)) {
-        final mutablePuzzle = Puzzle(tiles: [...state.puzzle.tiles]);
-        final puzzle = mutablePuzzle.moveTiles(tappedTile, []);
-        if (puzzle.isComplete()) {
+      if (state.puzzle.isTileCheekyBird(tappedTile) &&
+          !state.selectedCheekyBirds.contains(tappedTile)) {
+        print('tappping cheeky');
+        final puzzle = Puzzle(tiles: [...state.puzzle.tiles]);
+        List<Tile> newCheekies = [];
+        state.selectedCheekyBirds.forEach((element) {
+          newCheekies.add(element);
+        });
+        newCheekies.add(tappedTile);
+        if (puzzle.foundAllCheekyBirds(newCheekies)) {
           emit(
             state.copyWith(
               puzzle: puzzle.sort(),
               puzzleStatus: PuzzleStatus.complete,
               tileMovementStatus: TileMovementStatus.moved,
-              numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
-              numberOfMoves: state.numberOfMoves + 1,
+              numberOfCorrectTiles: newCheekies.length,
+              numberOfMoves: state.numberOfMoves - 1,
               lastTappedTile: tappedTile,
+              selectedCheekyBirds: newCheekies,
             ),
           );
         } else {
@@ -55,13 +66,25 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
             state.copyWith(
               puzzle: puzzle.sort(),
               tileMovementStatus: TileMovementStatus.moved,
-              numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
-              numberOfMoves: state.numberOfMoves + 1,
+              numberOfCorrectTiles: newCheekies.length,
+              numberOfMoves: state.numberOfMoves - 1,
               lastTappedTile: tappedTile,
+              selectedCheekyBirds: newCheekies,
             ),
           );
         }
       } else {
+        print('nt a cheeky');
+        emit(
+          state.copyWith(
+            puzzle: Puzzle(tiles: [...state.puzzle.tiles]).sort(),
+            tileMovementStatus: TileMovementStatus.moved,
+            numberOfCorrectTiles: state.selectedCheekyBirds.length,
+            numberOfMoves: state.numberOfMoves - 1,
+            lastTappedTile: tappedTile,
+            selectedCheekyBirds: state.selectedCheekyBirds,
+          ),
+        );
         emit(
           state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
         );
@@ -69,6 +92,20 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
     } else {
       emit(
         state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
+      );
+    }
+
+    if (state.numberOfMoves == 0) {
+      emit(
+        state.copyWith(
+          puzzle: Puzzle(tiles: [...state.puzzle.tiles]).sort(),
+          puzzleStatus: PuzzleStatus.complete,
+          tileMovementStatus: TileMovementStatus.cannotBeMoved,
+          numberOfCorrectTiles: state.selectedCheekyBirds.length,
+          numberOfMoves: state.numberOfMoves,
+          lastTappedTile: tappedTile,
+          selectedCheekyBirds: state.selectedCheekyBirds,
+        ),
       );
     }
   }
@@ -79,6 +116,8 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
       PuzzleState(
         puzzle: puzzle.sort(),
         numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
+        numberOfMoves:
+            puzzle.tiles.where((element) => element.isCheekyBird).length + 2,
       ),
     );
   }
@@ -141,14 +180,15 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
     List<Position> currentPositions,
   ) {
     final whitespacePosition = Position(x: size, y: size);
+    currentPositions.shuffle();
     return [
       for (int i = 1; i <= size * size; i++)
-        if (i == size * size)
+        if (i % 4 == 0)
           Tile(
             value: i,
-            correctPosition: whitespacePosition,
+            correctPosition: correctPositions[i - 1],
             currentPosition: currentPositions[i - 1],
-            isWhitespace: true,
+            isCheekyBird: true,
           )
         else
           Tile(
