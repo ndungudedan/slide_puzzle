@@ -11,6 +11,7 @@ class Tile extends Equatable {
     required this.correctPosition,
     required this.currentPosition,
     this.isWhitespace = false,
+    this.isCheekyBird = false,
   });
 
   /// Value representing the correct position of [Tile] in a list.
@@ -26,14 +27,16 @@ class Tile extends Equatable {
   /// Denotes if the [Tile] is the whitespace tile or not.
   final bool isWhitespace;
 
+  final bool isCheekyBird;
+
   /// Create a copy of this [Tile] with updated current position.
   Tile copyWith({required Position currentPosition}) {
     return Tile(
-      value: value,
-      correctPosition: correctPosition,
-      currentPosition: currentPosition,
-      isWhitespace: isWhitespace,
-    );
+        value: value,
+        correctPosition: correctPosition,
+        currentPosition: currentPosition,
+        isWhitespace: isWhitespace,
+        isCheekyBird: isCheekyBird);
   }
 
   @override
@@ -42,5 +45,6 @@ class Tile extends Equatable {
         correctPosition,
         currentPosition,
         isWhitespace,
+        isCheekyBird,
       ];
 }

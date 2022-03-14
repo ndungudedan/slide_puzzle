@@ -52,6 +52,11 @@ class Puzzle extends Equatable {
     return tiles.singleWhere((tile) => tile.isWhitespace);
   }
 
+  ///gets the tile with a bird
+  List<Tile> getCheekyBirdTiles() {
+    return tiles.where((tile) => tile.isCheekyBird).toList();
+  }
+
   /// Gets the tile relative to the whitespace tile in the puzzle
   /// defined by [relativeOffset].
   Tile? getTileRelativeToWhitespaceTile(Offset relativeOffset) {
@@ -67,37 +72,34 @@ class Puzzle extends Equatable {
 
   /// Gets the number of tiles that are currently in their correct position.
   int getNumberOfCorrectTiles() {
-    final whitespaceTile = getWhitespaceTile();
+    //final whitespaceTile = getWhitespaceTile();
     var numberOfCorrectTiles = 0;
     for (final tile in tiles) {
-      if (tile != whitespaceTile) {
-        if (tile.currentPosition == tile.correctPosition) {
-          numberOfCorrectTiles++;
-        }
+      if (tile.currentPosition == tile.correctPosition) {
+        numberOfCorrectTiles++;
       }
     }
     return numberOfCorrectTiles;
   }
 
   /// Determines if the puzzle is completed.
-  bool isComplete() {
-    return (tiles.length - 1) - getNumberOfCorrectTiles() == 0;
+  bool foundAllCheekyBirds(List<Tile> selectedCheekyBirds) {
+    var tiles = getCheekyBirdTiles();
+    var cheeks = tiles.where(
+      (element) {
+        return element.isCheekyBird == true;
+      },
+    );
+
+    return cheeks.length == selectedCheekyBirds.length;
   }
 
   /// Determines if the tapped tile can move in the direction of the whitespace
   /// tile.
-  bool isTileMovable(Tile tile) {
-    final whitespaceTile = getWhitespaceTile();
-    if (tile == whitespaceTile) {
-      return false;
-    }
-
-    // A tile must be in the same row or column as the whitespace to move.
-    if (whitespaceTile.currentPosition.x != tile.currentPosition.x &&
-        whitespaceTile.currentPosition.y != tile.currentPosition.y) {
-      return false;
-    }
-    return true;
+  bool isTileCheekyBird(Tile tile) {
+    final cheekyTiles = getCheekyBirdTiles();
+    print('isTileCheekyBird ${tile.isCheekyBird}');
+    return tile.isCheekyBird;
   }
 
   /// Determines if the puzzle is solvable.
@@ -108,11 +110,13 @@ class Puzzle extends Equatable {
       size * height == tiles.length,
       'tiles must be equal to size * height',
     );
-    final inversions = countInversions();
+    return true;
+    /* final inversions = countInversions();
 
     if (size.isOdd) {
       return inversions.isEven;
     }
+    
 
     final whitespace = tiles.singleWhere((tile) => tile.isWhitespace);
     final whitespaceRow = whitespace.currentPosition.y;
@@ -121,7 +125,7 @@ class Puzzle extends Equatable {
       return inversions.isEven;
     } else {
       return inversions.isOdd;
-    }
+    } */
   }
 
   /// Gives the number of inversions in a puzzle given its tile arrangement.

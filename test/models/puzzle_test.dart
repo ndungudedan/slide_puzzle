@@ -307,20 +307,22 @@ void main() {
 
     group('isTileMoveable', () {
       test('returns true when tile is adjacent to whitespace', () {
-        expect(solvable2x2Puzzle.isTileMovable(solvable2x2Tile3), isTrue);
+        expect(solvable2x2Puzzle.isTileCheekyBird(solvable2x2Tile3), isTrue);
       });
 
       test('returns false when tile is not adjacent to whitespace', () {
-        expect(solvable2x2Puzzle.isTileMovable(solvable2x2Tile2), isFalse);
+        expect(solvable2x2Puzzle.isTileCheekyBird(solvable2x2Tile2), isFalse);
       });
 
       test('returns true when tile is in same row/column as whitespace', () {
-        expect(unsolvable3x3Puzzle.isTileMovable(unsolvable3x3Tile3), isTrue);
+        expect(
+            unsolvable3x3Puzzle.isTileCheekyBird(unsolvable3x3Tile3), isTrue);
       });
 
       test('returns false when tile is not in same row/column as whitespace',
           () {
-        expect(unsolvable3x3Puzzle.isTileMovable(unsolvable3x3Tile2), isFalse);
+        expect(
+            unsolvable3x3Puzzle.isTileCheekyBird(unsolvable3x3Tile2), isFalse);
       });
     });
 

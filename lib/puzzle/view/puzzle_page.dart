@@ -12,6 +12,8 @@ import 'package:very_good_slide_puzzle/theme/theme.dart';
 import 'package:very_good_slide_puzzle/timer/timer.dart';
 import 'package:very_good_slide_puzzle/typography/typography.dart';
 
+import '../../pickatar/pickatar.dart';
+
 /// {@template puzzle_page}
 /// The root page of the puzzle UI.
 ///
@@ -36,7 +38,22 @@ class PuzzlePage extends StatelessWidget {
           ),
         ),
         BlocProvider(
+          create: (_) => PickatarThemeBloc(
+            themes: const [
+              BluePickatarTheme(),
+              GreenPickatarTheme(),
+              YellowPickatarTheme()
+            ],
+          ),
+        ),
+        BlocProvider(
           create: (_) => DashatarPuzzleBloc(
+            secondsToBegin: 3,
+            ticker: const Ticker(),
+          ),
+        ),
+        BlocProvider(
+          create: (_) => PickatarPuzzleBloc(
             secondsToBegin: 3,
             ticker: const Ticker(),
           ),
@@ -46,6 +63,7 @@ class PuzzlePage extends StatelessWidget {
             initialThemes: [
               const SimpleTheme(),
               context.read<DashatarThemeBloc>().state.theme,
+              context.read<PickatarThemeBloc>().state.theme,
             ],
           ),
         ),
@@ -86,24 +104,31 @@ class PuzzleView extends StatelessWidget {
             final dashatarTheme = context.read<DashatarThemeBloc>().state.theme;
             context.read<ThemeBloc>().add(ThemeUpdated(theme: dashatarTheme));
           },
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider(
-                create: (context) => TimerBloc(
-                  ticker: const Ticker(),
-                ),
-              ),
-              BlocProvider(
-                create: (context) => PuzzleBloc(4)
-                  ..add(
-                    PuzzleInitialized(
-                      shufflePuzzle: shufflePuzzle,
-                    ),
+          child: BlocListener<PickatarThemeBloc, PickatarThemeState>(
+            listener: (context, state) {
+              final pickatarTheme =
+                  context.read<PickatarThemeBloc>().state.theme;
+              context.read<ThemeBloc>().add(ThemeUpdated(theme: pickatarTheme));
+            },
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => TimerBloc(
+                    ticker: const Ticker(),
                   ),
+                ),
+                BlocProvider(
+                  create: (context) => PuzzleBloc(4)
+                    ..add(
+                      PuzzleInitialized(
+                        shufflePuzzle: shufflePuzzle,
+                      ),
+                    ),
+                ),
+              ],
+              child: const _Puzzle(
+                key: Key('puzzle_view_puzzle'),
               ),
-            ],
-            child: const _Puzzle(
-              key: Key('puzzle_view_puzzle'),
             ),
           ),
         ),
@@ -447,6 +472,10 @@ class PuzzleMenuItem extends StatelessWidget {
                 // Stop the Dashatar countdown if it has been started.
                 context.read<DashatarPuzzleBloc>().add(
                       const DashatarCountdownStopped(),
+                    );
+                // Stop the Dashatar countdown if it has been started.
+                context.read<PickatarPuzzleBloc>().add(
+                      const PickatarCountdownStopped(),
                     );
 
                 // Initialize the puzzle board for the newly selected theme.

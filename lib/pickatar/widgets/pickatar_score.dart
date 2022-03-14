@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:very_good_slide_puzzle/colors/colors.dart';
-import 'package:very_good_slide_puzzle/dashatar/dashatar.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
+import 'package:very_good_slide_puzzle/pickatar/bloc/pickatar_theme_bloc.dart';
+import 'package:very_good_slide_puzzle/pickatar/widgets/pickatar_timer.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
 import 'package:very_good_slide_puzzle/theme/themes/themes.dart';
 import 'package:very_good_slide_puzzle/theme/widgets/widgets.dart';
 import 'package:very_good_slide_puzzle/typography/typography.dart';
 
 /// {@template dashatar_score}
-/// Displays the score of the solved Dashatar puzzle.
+/// Displays the score of the solved Pickatar puzzle.
 /// {@endtemplate}
-class DashatarScore extends StatelessWidget {
+class PickatarScore extends StatelessWidget {
   /// {@macro dashatar_score}
-  const DashatarScore({Key? key}) : super(key: key);
+  const PickatarScore({Key? key}) : super(key: key);
 
   static const _smallImageOffset = Offset(124, 36);
   static const _mediumImageOffset = Offset(215, -47);
@@ -22,7 +23,7 @@ class DashatarScore extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.select((DashatarThemeBloc bloc) => bloc.state.theme);
+    final theme = context.select((PickatarThemeBloc bloc) => bloc.state.theme);
     final state = context.watch<PuzzleBloc>().state;
     final l10n = context.l10n;
 
@@ -138,7 +139,7 @@ class DashatarScore extends StatelessWidget {
                         medium: 9,
                         large: 9,
                       ),
-                      DashatarTimer(
+                      PickatarTimer(
                         textStyle: timerTextStyle,
                         iconSize: timerIconSize,
                         iconPadding: timerIconPadding,
@@ -157,7 +158,7 @@ class DashatarScore extends StatelessWidget {
                         duration: PuzzleThemeAnimationDuration.textStyle,
                         child: Text(
                           l10n.dashatarSuccessNumberOfMoves(
-                            state.numberOfCorrectTiles.toString(),
+                            state.numberOfMoves.toString(),
                           ),
                         ),
                       ),

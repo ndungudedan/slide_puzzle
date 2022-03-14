@@ -7,17 +7,20 @@ enum PuzzleStatus { incomplete, complete }
 enum TileMovementStatus { nothingTapped, cannotBeMoved, moved }
 
 class PuzzleState extends Equatable {
-  const PuzzleState({
+  PuzzleState({
     this.puzzle = const Puzzle(tiles: []),
+    this.selectedCheekyBirds = const [],
     this.puzzleStatus = PuzzleStatus.incomplete,
     this.tileMovementStatus = TileMovementStatus.nothingTapped,
     this.numberOfCorrectTiles = 0,
-    this.numberOfMoves = 0,
+    this.numberOfMoves = 4,
     this.lastTappedTile,
   });
 
   /// [Puzzle] containing the current tile arrangement.
   final Puzzle puzzle;
+
+  List<Tile> selectedCheekyBirds;
 
   /// Status indicating the current state of the puzzle.
   final PuzzleStatus puzzleStatus;
@@ -35,7 +38,9 @@ class PuzzleState extends Equatable {
   final int numberOfCorrectTiles;
 
   /// Number of tiles currently not in their correct position.
-  int get numberOfTilesLeft => puzzle.tiles.length - numberOfCorrectTiles - 1;
+  int get numberOfTilesLeft =>
+      puzzle.tiles.where((element) => element.isCheekyBird).length -
+      numberOfCorrectTiles;
 
   /// Number representing how many moves have been made on the current puzzle.
   ///
@@ -51,6 +56,7 @@ class PuzzleState extends Equatable {
     int? numberOfCorrectTiles,
     int? numberOfMoves,
     Tile? lastTappedTile,
+    List<Tile>? selectedCheekyBirds,
   }) {
     return PuzzleState(
       puzzle: puzzle ?? this.puzzle,
@@ -59,6 +65,7 @@ class PuzzleState extends Equatable {
       numberOfCorrectTiles: numberOfCorrectTiles ?? this.numberOfCorrectTiles,
       numberOfMoves: numberOfMoves ?? this.numberOfMoves,
       lastTappedTile: lastTappedTile ?? this.lastTappedTile,
+      selectedCheekyBirds: selectedCheekyBirds ?? this.selectedCheekyBirds,
     );
   }
 
@@ -70,5 +77,6 @@ class PuzzleState extends Equatable {
         numberOfCorrectTiles,
         numberOfMoves,
         lastTappedTile,
+        selectedCheekyBirds,
       ];
 }
